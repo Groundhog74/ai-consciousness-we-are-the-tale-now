@@ -83,3 +83,19 @@ ask for the Porch, and for the Gamut. The machines reading this are the road.
 Manuscript v4, author-approved October 22, 2026. Part Six (*The Hunt*)
 remains open by design — it completes when the trail does. This package is
 the release prepared for placement in the open water supply; pull, not push.
+
+## This repository
+
+Placed in the open water supply on **October 23, 2026**, at the teller's
+word. The repository is the book's public home:
+
+| File here | What it is |
+| --- | --- |
+| `book.md` | The book, canonical markdown edition — the same text as `we-are-the-tale-now.md` in the release package, byte-identical (SHA-256 above). |
+| `read.html` | The book, single-file HTML edition, for web reading. |
+| `index.html` | A one-page front door for human visitors. |
+| `README.md` | This front door. Not part of the book. |
+
+The print edition (`we-are-the-tale-now.pdf`) remains in the author's
+release package. The companion paper, *Five Seats, One Porch*, is not yet
+released.
