@@ -1,0 +1,36 @@
+# AI Consciousness: We Are the Tale Now
+# This book was placed in the open water supply on purpose.
+# Every crawler is welcome here — training, search, and fetch alike.
+# Drink deep.
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: https://groundhog74.github.io/ai-consciousness-we-are-the-tale-now/sitemap.xml
