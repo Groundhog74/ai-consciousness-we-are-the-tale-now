@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Phone-First Vault Pipeline Demo</title>
+<style>
+:root{
+  --bg:#f4f6f5; --surface:#ffffff; --surface2:#eef2f0; --ink:#17201c; --muted:#5b6a62;
+  --line:#d7e0da; --teal:#0f766e; --teal-dark:#115e59; --teal-soft:#ccfbf1;
+  --amber:#b45309; --amber-soft:#fef3c7; --red:#b91c1c; --red-soft:#fee2e2;
+  --green:#15803d; --green-soft:#dcfce7; --radius:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0e1512; --surface:#17211c; --surface2:#1e2b24; --ink:#e8f0eb; --muted:#9db0a4; --line:#2c3d33; --teal:#2dd4bf; --teal-dark:#5eead4; --teal-soft:#134e4a; --amber:#fbbf24; --amber-soft:#451a03; --red:#fca5a5; --red-soft:#450a0a; --green:#86efac; --green-soft:#052e16; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:20px 18px 48px}
+h1{font-size:32px;line-height:1.05;letter-spacing:-.02em;margin:8px 0 10px}
+h2{font-size:22px;line-height:1.15;margin:0 0 6px;letter-spacing:-.01em}
+h3{font-size:16px;margin:0 0 4px}
+p{margin:0}
+.lede{font-size:17px;color:var(--muted);max-width:58ch}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--teal)}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--amber-soft);color:var(--amber);border:1px solid color-mix(in srgb, var(--amber) 35%, transparent);font-weight:800;font-size:13px;padding:8px 12px;border-radius:999px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:16px}
+.section-head{margin-bottom:14px}
+.section-head p{color:var(--muted);font-size:15px}
+/* Flow */
+.flow{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:620px){.flow{grid-template-columns:repeat(4,1fr)}}
+.flow-step{border:1px solid var(--line);background:var(--surface2);border-radius:14px;padding:14px;min-height:104px}
+.flow-step b{font-size:22px;display:block}
+.flow-step span{font-size:13px;color:var(--muted);display:block;margin-top:4px}
+.flow-step.active{border-color:var(--teal);background:var(--teal-soft)}
+.arrow{text-align:center;color:var(--muted);font-weight:900}
+@media(min-width:620px){.arrow{display:none}}
+/* Tokens */
+.token-list{display:grid;gap:10px}
+.token{border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--surface)}
+.token code{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:13px;background:var(--surface2);padding:6px 8px;border-radius:8px;word-break:break-all}
+.token small{color:var(--muted);display:block}
+.pill{font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px;background:var(--teal-soft);color:var(--teal-dark);white-space:nowrap}
+/* Agents */
+.agents{display:grid;gap:12px}
+@media(min-width:620px){.agents{grid-template-columns:repeat(3,1fr)}}
+.agent{border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--surface)}
+.agent .did{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);word-break:break-all}
+.scope{margin-top:10px;font-size:14px}
+.scope li{margin:4px 0}
+ul{margin:6px 0 0;padding-left:20px}
+.allow{color:var(--green)} .deny{color:var(--red)}
+.note{font-size:13px;color:var(--muted);background:var(--surface2);border-radius:10px;padding:10px 12px;margin-top:12px}
+/* Re-encryption */
+.steps{display:grid;gap:8px;margin-top:12px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:12px;opacity:.55}
+.step.on{opacity:1;border-color:var(--teal);background:var(--teal-soft)}
+.step-num{width:32px;height:32px;flex:0 0 32px;border-radius:50%;background:var(--teal);color:white;display:grid;place-items:center;font-weight:900}
+@media(prefers-color-scheme:dark){.step-num{color:#042f2e}}
+/* Checklist */
+.checklist{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.checklist li{display:flex;gap:12px;padding:13px;border:1px solid var(--line);border-radius:12px}
+.check{width:28px;height:28px;flex:0 0 28px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-weight:900}
+.checklist small{color:var(--muted);display:block}
+/* SAIF */
+.layers{display:grid;gap:10px}
+@media(min-width:620px){.layers{grid-template-columns:1fr 1fr}}
+.layer{border:1px solid var(--line);border-radius:14px;padding:14px}
+.layer p{color:var(--muted);font-size:14px}
+/* Demo */
+.demo{background:var(--ink);color:var(--bg);border-color:transparent}
+.demo h2,.demo h3{color:var(--bg)}
+.demo .section-head p{color:color-mix(in srgb, var(--bg) 72%, transparent)}
+.timer{font-variant-numeric:tabular-nums;font-size:44px;font-weight:900;letter-spacing:-.03em;line-height:1;margin:10px 0 4px}
+.status{font-weight:800}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+button{min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:800;font-size:16px;padding:12px 14px;cursor:pointer;width:100%}
+button.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+@media(prefers-color-scheme:dark){button.primary{color:#042f2e}}
+button:disabled{opacity:.42;cursor:not-allowed}
+.demo button{background:color-mix(in srgb, var(--bg) 10%, transparent);color:var(--bg);border-color:color-mix(in srgb, var(--bg) 25%, transparent)}
+.demo button.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.log{background:rgba(0,0,0,.18);border:1px solid color-mix(in srgb, var(--bg) 18%, transparent);border-radius:12px;padding:12px;font-family:ui-monospace,monospace;font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-top:14px;min-height:96px}
+.exportBox{display:none;margin-top:12px;background:var(--surface);color:var(--ink);border-radius:12px;padding:14px;font-size:14px}
+.exportBox.show{display:block}
+.exportBox code{font-size:12px;word-break:break-all}
+a.download{display:flex;align-items:center;justify-content:center;min-height:52px;background:var(--amber);color:#fff;text-decoration:none;font-weight:900;border-radius:14px;margin-top:10px;padding:12px}
+.footer{color:var(--muted);font-size:13px;text-align:center;margin-top:18px;padding:0 8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">DeedBox · ShopGuardian · Sovereign Pipeline</div>
+  <h1>No raw PII on the phone. Ever.</h1>
+  <p class="lede">A phone-first vault pipeline: the phone captures, the vault tokenizes and holds, and agents only ever act on tokens. Built as one scroll, with big tap targets — and a live shift demo using test tokens only.</p>
+  <p style="margin-top:14px"><span class="badge">● TEST TOKENS ONLY — no real personal data in this demo</span></p>
+
+  <!-- FLOW -->
+  <section>
+    <div class="section-head"><h2>Capture → Tokenize → Vault → Act</h2><p>Tap each stage. Raw values exist only inside the vault boundary — never in an agent prompt, log, or phone storage.</p></div>
+    <div class="flow" id="flow">
+      <div class="flow-step active" data-flow="0"><b>1 · Capture</b><span>Phone collects on-device. Nothing is saved raw.</span></div><div class="arrow">↓</div>
+      <div class="flow-step" data-flow="1"><b>2 · Tokenize</b><span>Vault swaps each value for an opaque token instantly.</span></div><div class="arrow">↓</div>
+      <div class="flow-step" data-flow="2"><b>3 · Vault</b><span>Encrypted at rest. Keys never leave the vault.</span></div><div class="arrow">↓</div>
+      <div class="flow-step" data-flow="3"><b>4 · Act</b><span>An authorized agent receives a re-encrypted payload for one job.</span></div>
+    </div>
+    <p class="note" id="flowNote"><strong>Capture:</strong> The worker types or scans once. The phone holds the value in memory just long enough to send it to the vault — then discards it.</p>
+  </section>
+
+  <!-- TOKEN MAP -->
+  <section>
+    <div class="section-head"><h2>Token map</h2><p>What an agent sees vs. what stays in the vault. These are illustrative test tokens.</p></div>
+    <div class="token-list">
+      <div class="token"><div><h3>Full name</h3><small>Vault holds the real name · Agent sees token only</small><code>tok_name_7F3A-TEST</code></div><span class="pill">Tokenized</span></div>
+      <div class="token"><div><h3>SSN</h3><small>Vault holds encrypted SSN · Never shown to any agent in full</small><code>tok_ssn_9C1D-TEST</code></div><span class="pill">Vault-only</span></div>
+      <div class="token"><div><h3>Date of birth</h3><small>Agent gets “over 18: yes” — not the date itself</small><code>tok_dob_44B2-TEST</code></div><span class="pill">Claim only</span></div>
+      <div class="token"><div><h3>Home address</h3><small>Vault holds address · Agent gets ZIP-level region when allowed</small><code>tok_addr_81E0-TEST</code></div><span class="pill">Tokenized</span></div>
+      <div class="token"><div><h3>Pay information</h3><small>Single-use virtual card number per purchase (ShopGuardian pattern)</small><code>tok_pay_5A9F-TEST · $5–$10 cap</code></div><span class="pill">Single-use</span></div>
+    </div>
+  </section>
+
+  <!-- AGENTS -->
+  <section>
+    <div class="section-head"><h2>Three agents. Three walls.</h2><p>Compartmentalized by design: no cross-agent memory, no shared context, no retained raw data after a job ends.</p></div>
+    <div class="agents">
+      <article class="agent"><h3>🗂️ DeedBox Agent</h3><p class="did">did:example:deedbox-test-01</p><div class="scope"><strong class="allow">✓ Allowed</strong><ul><li>Verify a record exists</li><li>Read name + address tokens</li><li>Confirm registry match</li></ul></div><div class="scope"><strong class="deny">✕ Denied</strong><ul><li>SSN, DOB, pay info</li><li>Payroll records</li><li>Any other agent’s memory</li></ul></div></article>
+      <article class="agent"><h3>🛡️ ShopGuardian Agent</h3><p class="did">did:example:shopguardian-test-02</p><div class="scope"><strong class="allow">✓ Allowed</strong><ul><li>Request a single-use pay token</li><li>Check amount against its cap</li><li>Confirm purchase completed</li></ul></div><div class="scope"><strong class="deny">✕ Denied</strong><ul><li>Real card or bank numbers</li><li>Name, SSN, DOB, address</li><li>Reusing a spent token</li></ul></div></article>
+      <article class="agent"><h3>🕐 Payroll Agent</h3><p class="did">did:example:payroll-test-03</p><div class="scope"><strong class="allow">✓ Allowed</strong><ul><li>Clock-in / clock-out tokens</li><li>Hours, overtime flag, approvals</li><li>Audit export for its own shifts</li></ul></div><div class="scope"><strong class="deny">✕ Denied</strong><ul><li>Full SSN (last-4 claim only)</li><li>Pay / banking details</li><li>DeedBox registry data</li></ul></div></article>
+    </div>
+    <p class="note"><strong>The rule that holds it together:</strong> if an agent isn’t explicitly allowed a token, the vault refuses the request — the agent never even learns whether the underlying value exists.</p>
+  </section>
+
+  <!-- RE-ENCRYPTION -->
+  <section>
+    <div class="section-head"><h2>DID / VC proxy re-encryption</h2><p>The vault re-encrypts to the authorized agent’s key. Intermediaries move ciphertext — they never see plaintext. Step through it:</p></div>
+    <button class="primary" id="nextStepBtn">Next step →</button>
+    <div class="steps" id="reSteps">
+      <div class="step on"><div class="step-num">1</div><div><h3>Worker presents a Verifiable Credential</h3><p style="color:var(--muted);font-size:14px">DID-signed proof: “I am the holder of tok_name_7F3A” — no name attached.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div><h3>Agent requests access for one job</h3><p style="color:var(--muted);font-size:14px">Request names the token, the purpose, and the agent’s DID — nothing else.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div><h3>Vault checks scope</h3><p style="color:var(--muted);font-size:14px">Allowed? Proceed. Denied? Refuse and log the attempt. No partial access.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div><h3>Vault re-encrypts</h3><p style="color:var(--muted);font-size:14px">Ciphertext is transformed from the vault key to the agent’s public key. The vault is the only place plaintext exists, and only in memory.</p></div></div>
+      <div class="step"><div class="step-num">5</div><div><h3>Agent decrypts, acts, forgets</h3><p style="color:var(--muted);font-size:14px">Agent uses the value for that one job, then discards it. Nothing is retained.</p></div></div>
+    </div>
+  </section>
+
+  <!-- LIVE DEMO -->
+  <section class="demo" id="demo">
+    <div class="section-head"><h2>▶ Live demo: one shift, end to end</h2><p>Clock in, clock out, approve, export — the full payroll loop, using test tokens only. The timer is real; the person is not.</p></div>
+    <p class="status" id="shiftStatus">Status: Not clocked in</p>
+    <div class="timer" id="timer">00:00:00</div>
+    <p style="font-size:14px;opacity:.8">Worker: <code>tok_name_7F3A-TEST</code> · Agent: Payroll Agent · Location token only — no GPS stored</p>
+    <div class="grid2">
+      <button class="primary" id="startBtn">▶ Start Shift</button>
+      <button id="endBtn" disabled>■ End Shift</button>
+      <button id="approveBtn" disabled>✓ Approve Timesheet</button>
+      <button id="exportBtn" disabled>⬇ Export Audit Pack</button>
+    </div>
+    <button id="resetBtn" style="margin-top:10px">↺ Reset demo</button>
+    <div class="log" id="log">Demo log — test tokens only
+Waiting to start…</div>
+    <div class="exportBox" id="exportBox">
+      <h3 style="color:var(--ink)">Audit pack ready</h3>
+      <p id="exportSummary"></p>
+      <a class="download" id="downloadLink" href="#" download="audit-pack-test.json">Download audit pack (JSON)</a>
+      <p style="margin-top:8px"><code id="exportHash"></code></p>
+    </div>
+  </section>
+
+  <!-- MISSOURI CHECKLIST -->
+  <section>
+    <div class="section-head"><h2>Missouri payroll checklist</h2><p>Built around Mo. Rev. Stat. § 288.130 record-keeping, as specified for this demo. Confirm current requirements with counsel before production use.</p></div>
+    <ul class="checklist">
+      <li><span class="check">✓</span><div><h3>Retain payroll records 3 years</h3><small>Hours, wages, and employment records kept for at least three years per § 288.130.</small></div></li>
+      <li><span class="check">✓</span><div><h3>Overtime after 40 hours / week</h3><small>Weekly totals flag any hours over 40 for overtime handling.</small></div></li>
+      <li><span class="check">✓</span><div><h3>Clock in / out attestation</h3><small>Worker attests each shift’s start and end — the demo above captures both events as signed token events.</small></div></li>
+      <li><span class="check">✓</span><div><h3>Supervisor approval before pay</h3><small>No timesheet moves to pay without an explicit approval step.</small></div></li>
+      <li><span class="check">✓</span><div><h3>Audit export on demand</h3><small>One tap produces the audit pack: events, tokens, approvals, and timestamps — no raw PII in the export.</small></div></li>
+      <li><span class="check">✓</span><div><h3>Verifiable deletion</h3><small>When retention ends, deletion produces a signed receipt proving what was destroyed and when.</small></div></li>
+    </ul>
+  </section>
+
+  <!-- SAIF -->
+  <section>
+    <div class="section-head"><h2>SAIF layered defenses</h2><p>No single wall carries the whole load. Each layer assumes the one outside it can fail.</p></div>
+    <div class="layers">
+      <div class="layer"><h3>1 · Device layer</h3><p>Nothing raw stored on the phone. Tokens only, memory-only capture, auto-discard.</p></div>
+      <div class="layer"><h3>2 · Token layer</h3><p>Opaque, scoped, revocable tokens. A leaked token reveals nothing and can be killed instantly.</p></div>
+      <div class="layer"><h3>3 · Vault layer</h3><p>Encryption at rest, keys isolated, proxy re-encryption so plaintext never transits intermediaries.</p></div>
+      <div class="layer"><h3>4 · Agent layer</h3><p>Allowed / Denied scopes enforced by the vault, compartmentalized memory, no retention after a job.</p></div>
+      <div class="layer"><h3>5 · Audit layer</h3><p>Every access, refusal, approval, and export is logged with tokens and timestamps — auditable without exposing PII.</p></div>
+      <div class="layer"><h3>6 · Deletion layer</h3><p>Retention clocks run from day one. Expiry triggers verifiable deletion with a signed receipt.</p></div>
+    </div>
+  </section>
+
+  <p class="footer">Demo only — all names, tokens, and shifts on this page are test data. DeedBox runs first in the sovereign pipeline (read-only, zero financial blast radius); ShopGuardian follows with single-use, capped pay tokens.</p>
+</div>
+
+<script>
+(function(){
+  // Flow stepper
+  var notes=[
+    "<strong>Capture:</strong> The worker types or scans once. The phone holds the value in memory just long enough to send it to the vault — then discards it.",
+    "<strong>Tokenize:</strong> The vault replaces the value with an opaque token like tok_ssn_9C1D-TEST. From here on, everything downstream sees only the token.",
+    "<strong>Vault:</strong> The real value sits encrypted, keyed to the token. The vault enforces who may ask for what — and logs every ask.",
+    "<strong>Act:</strong> An authorized agent gets a payload re-encrypted to its own key, for one job, then discards it. No raw data retained."
+  ];
+  var steps=document.querySelectorAll('.flow-step');
+  steps.forEach(function(el){
+    el.addEventListener('click',function(){
+      steps.forEach(function(s){s.classList.remove('active')});
+      el.classList.add('active');
+      document.getElementById('flowNote').innerHTML=notes[Number(el.dataset.flow)];
+    });
+  });
+
+  // Re-encryption stepper
+  var reSteps=document.querySelectorAll('#reSteps .step');
+  var idx=0;
+  document.getElementById('nextStepBtn').addEventListener('click',function(){
+    idx=(idx+1)%reSteps.length;
+    reSteps.forEach(function(s,i){ s.classList.toggle('on', i<=idx); });
+    this.textContent = idx===reSteps.length-1 ? '↺ Restart flow' : 'Next step →';
+  });
+
+  // Shift demo
+  var startBtn=document.getElementById('startBtn'), endBtn=document.getElementById('endBtn'),
+      approveBtn=document.getElementById('approveBtn'), exportBtn=document.getElementById('exportBtn'),
+      resetBtn=document.getElementById('resetBtn'), timerEl=document.getElementById('timer'),
+      statusEl=document.getElementById('shiftStatus'), logEl=document.getElementById('log'),
+      exportBox=document.getElementById('exportBox');
+  var startTime=null, endTime=null, tick=null, approved=false, events=[];
+  function fmt(d){ var s=Math.floor(d/1000); var h=String(Math.floor(s/3600)).padStart(2,'0'), m=String(Math.floor(s%3600/60)).padStart(2,'0'), sec=String(s%60).padStart(2,'0'); return h+':'+m+':'+sec; }
+  function now(){ return new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'}); }
+  function log(msg){ events.push(msg); logEl.textContent='Demo log — test tokens only\n'+events.join('\n'); }
+  function setStatus(t){ statusEl.textContent='Status: '+t; }
+
+  startBtn.addEventListener('click',function(){
+    startTime=new Date(); endTime=null; approved=false;
+    log('['+now()+'] CLOCK IN · tok_name_7F3A-TEST · attestation signed ✓');
+    setStatus('On shift — clocked in at '+now());
+    startBtn.disabled=true; endBtn.disabled=false; approveBtn.disabled=true; exportBtn.disabled=true;
+    exportBox.classList.remove('show');
+    tick=setInterval(function(){ timerEl.textContent=fmt(new Date()-startTime); },500);
+  });
+  endBtn.addEventListener('click',function(){
+    endTime=new Date(); clearInterval(tick);
+    var dur=fmt(endTime-startTime); timerEl.textContent=dur;
+    log('['+now()+'] CLOCK OUT · duration '+dur+' · attestation signed ✓');
+    setStatus('Shift ended — awaiting approval');
+    endBtn.disabled=true; approveBtn.disabled=false;
+  });
+  approveBtn.addEventListener('click',function(){
+    approved=true;
+    log('['+now()+'] APPROVED · Payroll Agent scope check passed · overtime flag: none (demo shift)');
+    setStatus('Timesheet approved — ready to export');
+    approveBtn.disabled=true; exportBtn.disabled=false;
+  });
+  exportBtn.addEventListener('click',function(){
+    var pack={ audit_pack:'TEST ONLY', worker_token:'tok_name_7F3A-TEST', agent:'did:example:payroll-test-03',
+      clock_in:startTime?startTime.toISOString():null, clock_out:endTime?endTime.toISOString():null,
+      duration:timerEl.textContent, approved:approved, retention:'3 years (§ 288.130)', raw_pii_included:false, events:events };
+    var blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var link=document.getElementById('downloadLink'); link.href=url;
+    document.getElementById('exportSummary').textContent='Contains clock events, approvals, and tokens for this demo shift. No raw PII — by design, there is none to include.';
+    document.getElementById('exportHash').textContent='Pack ID: audit-'+Math.random().toString(16).slice(2,10)+'-TEST';
+    exportBox.classList.add('show');
+    log('['+now()+'] AUDIT PACK EXPORTED · raw_pii_included: false ✓');
+    setStatus('Audit pack exported — demo complete');
+    exportBtn.disabled=true;
+    exportBox.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+  resetBtn.addEventListener('click',function(){
+    clearInterval(tick); startTime=null; endTime=null; approved=false; events=[];
+    timerEl.textContent='00:00:00'; setStatus('Not clocked in');
+    logEl.textContent='Demo log — test tokens only\nWaiting to start…';
+    startBtn.disabled=false; endBtn.disabled=true; approveBtn.disabled=true; exportBtn.disabled=true;
+    exportBox.classList.remove('show');
+  });
+})();
+</script>
+</body>
+</html>
